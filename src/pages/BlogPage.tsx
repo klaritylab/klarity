@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Input } from '../components/ui/input'; // Adjusted import path
 import { Button } from '../components/ui/button'; // Adjusted import path
 import { Search } from 'lucide-react';
-import BlogCard, { BlogPost } from '../components/Blogcd'; // Adjusted import path
+import BlogCard, { BlogPost } from '../components/Blogcard';
 import Navbar from '../components/Navbar';
 
 const BLOG_POSTS: BlogPost[] = [
