@@ -17,6 +17,8 @@ import ChatwithPdf from "./pages/ChatwithPdf";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import SignIn from "./components/authui/SingIn";
 import SignUp from "./components/authui/SignUp";
+import BlogPage from "./pages/BlogPage";
+import UploadPDFsPage from "./pages/UploadPDFsPage";
 
 
 const queryClient = new QueryClient();
@@ -65,6 +67,9 @@ const App = () => {
               {/* Public Routes */}
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/upload-pdfs" element={<UploadPDFsPage />} />
+              <Route path="/chat" element={<ChatwithPdf />} />
+              <Route path="/blog" element={<BlogPage />} />
               <Route path="/courses" element={<CoursesPage />} />
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/profile" element={<ProfilePage />} />
@@ -95,7 +100,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/chatwithpdf"
+                path="/chatwithpdf/*"
                 element={
                   <PrivateRoute>
                     <ChatwithPdf />

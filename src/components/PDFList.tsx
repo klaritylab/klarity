@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 const PDFList = () => {
   const { pdfs, deletePDF, currentPDF, setCurrentPDF } = usePDFContext();
 
-  if (pdfs.length === 0) {
+  if (!pdfs || pdfs.length === 0) {
     return (
       <div className="text-center py-20">
         <h2 className="text-2xl font-bold mb-2">No PDFs found</h2>
