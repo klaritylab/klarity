@@ -21,6 +21,7 @@ import {
   GraduationCap,
   ChevronLeft
 } from "lucide-react";
+import ChatwithPdf from '@/pages/ChatwithPdf';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
