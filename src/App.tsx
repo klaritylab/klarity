@@ -13,6 +13,7 @@ import CanvasPage from "./pages/CanvasPage";
 import CoursesPage from "./pages/CoursesPage";
 import TasksPage from "./pages/TasksPage";
 import ProfilePage from "./pages/ProfilePage";
+import ChatwithPdf from "./pages/ChatwithPdf";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import SignIn from "./components/authui/SingIn";
 import SignUp from "./components/authui/SignUp";
@@ -90,6 +91,14 @@ const App = () => {
                 element={
                   <PrivateRoute>
                     <CanvasPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/chatwithpdf"
+                element={
+                  <PrivateRoute>
+                    <ChatwithPdf />
                   </PrivateRoute>
                 }
               />
