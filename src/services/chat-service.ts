@@ -1,6 +1,6 @@
 import { ChatSpace, ChatMessage, Canvas, Journal } from "../models/chat";
 import { sendMessageToBackend } from "./api"; 
-import { collection, addDoc, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/firebase"; // Adjust the import based on your project structure
 
 // Local storage keys
@@ -133,25 +133,71 @@ export const getSpace = (id: string): ChatSpace | undefined => {
   return spaces.find(space => space.id === id);
 };
 
-export const addMessageToSpace = (spaceId: string, content: string, isAi: boolean): ChatMessage | null => {
+export const addMessageToSpace = async (
+  userId: string,
+  spaceId: string,
+  content: string,
+  isAi: boolean
+): Promise<ChatMessage | null> => {
   const spaces = loadSpaces();
   const spaceIndex = spaces.findIndex(space => space.id === spaceId);
-  
   if (spaceIndex === -1) return null;
-  
+
   const message: ChatMessage = {
     id: generateId(),
     content,
     isAi,
     timestamp: new Date()
   };
-  
+
+  // LocalStorage push
   spaces[spaceIndex].messages.push(message);
   spaces[spaceIndex].updatedAt = new Date();
-  
   saveSpaces(spaces);
+
+  // Firestore push
+  try {
+    const messageRef = collection(
+      db,
+      "chat_history",
+      userId,
+      "messages",
+      spaceId,
+      "messages"
+    );
+
+    await addDoc(messageRef, {
+      content,
+      isAi,
+      timestamp: serverTimestamp(),
+    });
+  } catch (err) {
+    console.error("Error saving message to Firestore:", err);
+    // Optionally return early or keep local fallback
+  }
+
   return message;
 };
+
+// export const addMessageToSpace = (spaceId: string, content: string, isAi: boolean): ChatMessage | null => {
+//   const spaces = loadSpaces();
+//   const spaceIndex = spaces.findIndex(space => space.id === spaceId);
+  
+//   if (spaceIndex === -1) return null;
+  
+//   const message: ChatMessage = {
+//     id: generateId(),
+//     content,
+//     isAi,
+//     timestamp: new Date()
+//   };
+  
+//   spaces[spaceIndex].messages.push(message);
+//   spaces[spaceIndex].updatedAt = new Date();
+  
+//   saveSpaces(spaces);
+//   return message;
+// };
 
 export const deleteSpace = (id: string): boolean => {
   const spaces = loadSpaces();
@@ -247,7 +293,7 @@ export const deleteJournal = (id: string): boolean => {
 };
 
 // Simulate AI response (in a real app, this would call an API)
-export const getAiResponse = async (userId: string, message: string): Promise<string> => {
+export const getAiResponse = async (userId: string,   spaceId: string, message: string): Promise<string> => {
   // Simulate network delay
   // await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -259,6 +305,7 @@ export const getAiResponse = async (userId: string, message: string): Promise<st
       },
       body: JSON.stringify({
         user_id: userId,
+        space_id: spaceId,
         message: message,
       }),
     });
@@ -298,13 +345,29 @@ export const getAiResponse = async (userId: string, message: string): Promise<st
   //   " (This is a simulated AI response to: " + message + ")";  
 };
 
-export const handleChatInteraction = async (spaceId: string, userId: string, userMessage: string): Promise<ChatMessage[]> => {
-  const userMsg = addMessageToSpace(spaceId, userMessage, false);
-  const aiText = await getAiResponse(userId, userMessage);
-  const aiMsg = addMessageToSpace(spaceId, aiText, true);
 
-  return [userMsg!, aiMsg];
+export const handleChatInteraction = async (
+  userId: string,
+  spaceId: string,
+  userMessage: string
+): Promise<ChatMessage[]> => {
+  const userMsg = await addMessageToSpace(userId, spaceId, userMessage, false);
+
+  const aiText = await getAiResponse(userId, spaceId, userMessage);
+
+  const aiMsg = await addMessageToSpace(userId, spaceId, aiText, true);
+
+  // Filter out any nulls in case something fails
+  return [userMsg, aiMsg].filter((msg): msg is ChatMessage => msg !== null);
 };
+
+// export const handleChatInteraction = async (spaceId: string, userId: string, userMessage: string): Promise<ChatMessage[]> => {
+//   const userMsg = addMessageToSpace(spaceId, userMessage, false);
+//   const aiText = await getAiResponse(userId, userMessage);
+//   const aiMsg = addMessageToSpace(spaceId, aiText, true);
+
+//   return [userMsg!, aiMsg];
+// };
 
 
 
